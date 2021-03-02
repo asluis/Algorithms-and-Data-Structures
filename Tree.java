@@ -1,13 +1,14 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 
 /*
  Notes:
  
  - Constructor with no parameters. Only one constructor.
  
- - insert(x) method 			Implementation -> Testing
+ - insert(x) method 			Implementation DONE -> Testing TODO
  	- Discard duplicates
  	- Return true if element is added, false if not added (if duplicate then would return false)
  	- Use tree structure itself, nothing else.
@@ -15,7 +16,10 @@ import java.util.Collections;
  - size() method 				DONE
  	- returns the number of values in the tree. Includes values found in the same node.
  	
- - get(x) method				Implementation
+ - size(int x) method			TODO
+ 	- will return the int size of the subtree rooted at the node that contains integer x. (The size is the number of keys in that subtree.) If x is not in the tree, it should return 0.
+ 	
+ - get(x) method				TODO
  	- returns the item that would be at location x if the values in tree were sorted in ascending order (from least to largest, t.get(0) returns least item while t.get(t.size() - 1) returns largest item)
  	- Don't use any other structure, just use the 23 tree
  	
@@ -42,6 +46,79 @@ public class Tree {
 	public int size() {
 		return this.size;
 	}
+	
+	public int size(Integer val) {
+		
+		Node node = find(root, val);
+		if(node == null) return 0;
+		
+		
+		return size(node);
+	}
+	
+	
+	// Assumes we found node w/ target value. Now all we have to do is count the number of values in this subtree
+	private int size(Node root) { 
+		
+		if(root == null) {
+			return 0;
+		}
+		
+		int currNodeCount = root.numVals();
+		
+		return currNodeCount + size(root.lfChild) + size(root.midChild)+ size(root.lfChild);
+	}
+	
+	
+	// Assumes nodes have been properly split (i.e., max vals per node is 2) and no duplicates
+	private Node find(Node root, Integer target) { // Traverses tree until it finds a node w/ a matching value. If nothing is found, return null.
+		
+		if(root == null) { // Empty node, therefore base case and return
+			return null;
+		}
+		
+		Integer leftMost = root.getVal(0);
+		Integer rightMost = root.getVal(1);
+		
+		if(leftMost == null) {// Tree/node is empty base case
+			return null;
+		}
+		
+		
+		
+		// Three cases. 1) Val is less than leftmost OR 2) Val is inbetween leftmost and rightmost OR 3) val is greater than rightmost
+		
+		
+		// leftmost val is bigger than target ie case 1
+		if(leftMost > target) {
+			find(root.lfChild, target);
+		}
+		
+		// Target is inbetween leftmost and rightmost aka case 2
+		if(target > leftMost && rightMost != null && target < rightMost) {
+			find(root.midChild, target);
+		}
+		
+		
+		// Target is greater than rightmost. case 3
+		if(rightMost != null && target > rightMost) {
+			find(root.rtChild, target);
+		}
+		
+		if(leftMost == target || rightMost == target) {
+			return root;
+		}
+		
+		return null; // not found
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	public boolean insert(int x) {
 		int prevSize = this.size;
@@ -95,28 +172,14 @@ public class Tree {
 		}
 	}
 
-	public int get(int ithBiggest) {
-		
-		
-		return get(ithBiggest, size);
-	}
 
-	// Again using DFS
-	private int get(int ithBiggest, int size) {
-		
-		
-		
-		
-		
-		
-	}
 	
 	
 	private class Node{
 		
 		private static final int MAX_NUM_OF_VALS_PER_NODE = 3; // i.e., therefore capacity is 2 and once we reach 3 we must split.
 		
-		public Integer[] vals; // Keeps track of values in a node (referred to as 'keys' in video).
+		public Integer[] vals; // Keeps track of values in a node (referred to as 'keys' in video). // 0 = leftmost, 1 = rightmost
 		public Node lfChild;		// Not scalable.
 		public Node rtChild;
 		public Node midChild;
@@ -138,13 +201,45 @@ public class Tree {
 			midChild = null;
 		}
 		
-		public void addVal(int val) { // Assumes there is at least one null value in our array. Which there should because our node's capacity is 2, but we split once we reach 3.   O(nlogn)
-			for(int i = 0; i < MAX_NUM_OF_VALS_PER_NODE; i++) {
+		public int numVals() {
+			int i = 0;
+			for(; i < MAX_NUM_OF_VALS_PER_NODE; i++) {
 				if(vals[i] == null) {
-					vals[i] = val;
+					return i;
 				}
 			}
-			Arrays.sort(vals); // Makes sure our nodes are ordered properly. TODO: Maybe make it faster? Counting sort maybe.
+			return i;
+		}
+		
+		public void addVal(int val) { // Assumes there is at least one null value in our array. Which there should because our node's capacity is 2, but we split once we reach 3.   O(nlogn)
+			int i = 0;
+			for(; i < MAX_NUM_OF_VALS_PER_NODE; i++) {
+				if(vals[i] == null) {
+					vals[i] = val;
+					break; // We found a null? Then we add our digit there.
+				}
+			}
+			order(i);
+		}
+		
+		// nlogn
+		private void order(int i) {// Makes sure our nodes are ordered properly. TODO: Maybe make it faster? 
+			
+			// Custom sort that treats null as negative infinity
+			Arrays.sort(vals, new Comparator<Integer>() {
+				@Override
+				public int compare(Integer num1, Integer num2) {
+					if(num1 != null && num2 != null) { // both nums
+						return Integer.compare(num1, num2);
+					} else if(num1 == null && num2 != null) { // left operand is negative infinity
+						return 1;
+					}else if(num1 != null && num2 == null) { // right operand is negative infinity
+						return -1;
+					}
+					return 0; // both operands are negative infinity
+				}
+				
+			}); // nlogn
 		}
 		
 		
