@@ -13,8 +13,10 @@ public class Tests{
 		
 		t.insert(10);
 		t.insert(9);
+		t.insert(9); // Proves we aren't inserting a duplicate.
 		
 		assertEquals(2, t.size());
+		assertEquals(false, t.insert(10)); // further proves we don't insert duplicates.
 	}
 	
 
@@ -45,11 +47,50 @@ public class Tests{
       assertEquals(2, t.size(15));
       assertEquals(0, t.size(18));
       
-      //assertEquals(9, t.get(0));
-     // assertEquals(15, t.get(1));
+     assertEquals(9, t.get(0));
+     assertEquals(15, t.get(1));
 
    }
+   
+   
    /*
+    Illegal tests that require node to be separate public/protected class. Requires private methods to be public. Requires illegal tree constructor.
+    Used for testing real 23 trees since I can't get my split to work.
+   
+   @Test
+   public void manualTestOfTreeUsingIllegalNodeAndTree() {
+	   Node node = new Node();
+	   
+	   
+	   node.addVal(4);
+	   
+	   node.lfChild = new Node(2, node);
+	   node.lfChild.lfChild = new Node(1, node.lfChild);
+	   node.lfChild.rtChild = new Node(3, node.lfChild);
+	   
+	   node.rtChild = new Node(6, node);
+	   node.rtChild.addVal(8);
+	   node.rtChild.lfChild = new Node(5, node.rtChild);
+	   node.rtChild.midChild = new Node(7, node.rtChild);
+	   node.rtChild.rtChild = new Node(9, node.rtChild);
+	   
+	   Tree t = new Tree(node);
+	   
+	   
+	   assertEquals(9, t.size());
+	   t.insert(0);
+	   assertEquals(false, t.insert(0));
+	   //Node found = ;
+	   assertEquals(node.lfChild.lfChild, t.find(node, 1));
+	   assertEquals(null, t.find(node, 1000));
+	   
+	   assertEquals(new Integer(1), t.find(node, 1).getVal(1));
+	   
+	   assertEquals(node.rtChild, t.find(node, 8));
+	   assertEquals(node.rtChild.midChild, t.find(node, 7)); // IT FOUND IT!!!!
+   }
+   
+   */
 
    @Test
    public void oneSplitLeft()
@@ -183,6 +224,6 @@ public class Tests{
       
 
    }
-*/
+
 
 }
