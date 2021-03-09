@@ -69,7 +69,7 @@ public class Tree {
 
 	public int get(int index) {
 
-		return root.get(index, 0);
+		return root.get(index);
 	}
 	
 
@@ -122,7 +122,7 @@ public class Tree {
 		return prevSize != this.size;
 	}
 
-	private class Node {
+	class Node {
 
 		private static final int MAX_VALS = 3; // i.e., therefore capacity is 2 and once we reach 3 we
 												// must split.
@@ -295,25 +295,32 @@ public class Tree {
 		// In order for BST: left, visit, right. For 23 Tree I think it will be left,
 		// visit, mid, visit, right ?
 		// Assumes nodes do not exceed maxiumum (2). Assumes index exists in tree.
-		public Integer get(int targetIndex, int currIndex) {
+		public Integer get(int targetIndex) {
 			// "I will not call it with values that are supposed to be out of bounds."
 			
 			
-			//TODO: WIP. Trying to think of a way to integrate it into 
-			
-			for(int i = 0; i < MAX_CHILDREN - 1; i++) {
-				if(children[i] != null) {
-					children[i].get(targetIndex, currIndex);
+			// Index of val a is size of left subtree. Index of right val is size of leftsubtree + size of Mid subtree + 1.
+			int nodeSkipped = 0;
+			for(int i = 0; i < MAX_VALS - 1; i++) {
+				if(vals[i] != null) {
+					for(int j = 0; j < i; j++) {
+						if(children[j] != null) {
+							nodeSkipped = children[j].size();
+						}
+						nodeSkipped++;//Accounting for the previous val in our node
+					}
 					
+					if(targetIndex == 0 || targetIndex == nodeSkipped) {
+						return vals[i];
+					}
+					
+					if(targetIndex < nodeSkipped) {
+						return children[i].get(targetIndex - nodeSkipped);
+					}
+				}else { // We got to a null val, check if our value is in corresponding children index
+					return children[i].get(targetIndex - nodeSkipped);
 				}
-				
-				
-				
-				
-				
-				
 			}
-			
 			
 			
 			
@@ -403,27 +410,13 @@ public class Tree {
 
 		public int size() {
 			int currNodeCount = this.numVals();
-			
 			// Essentially iterating over children array and adding each to our count. 
 			for(int child = 0; child < children.length; child++) {
 				if(children[child] != null) {
 					currNodeCount += children[child].size();
 				}
 			}
-			
 			return currNodeCount;
-
-			/* Essentially iterating over children array and adding each to our count.
-			if (this.lfChild != null) {
-				currNodeCount += this.lfChild.size();
-			}
-			if (this.rtChild != null) {
-				currNodeCount += this.rtChild.size();
-			}
-			if (this.midChild != null) {
-				currNodeCount += this.midChild.size();
-			}
-			*/
 		}
 		
 	}
