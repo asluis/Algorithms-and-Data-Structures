@@ -66,15 +66,17 @@ public class Tests{
 	   node.children[0].children[2] = t.new Node(3, node.children[0]);
 	   
 	   node.children[2] = t.new Node(6, node);
-	   node.children[2].addVal(8);
+	   node.children[2].addVal(9);
 	   node.children[2].children[0] = t.new Node(5, node.children[2]);
 	   node.children[2].children[1] = t.new Node(7, node.children[2]);
-	   node.children[2].children[2] = t.new Node(9, node.children[2]);
-	   
+	   node.children[2].children[2] = t.new Node(10, node.children[2]);
+	
 
-	   assertEquals(9, t.size());
-	   t.insert(0);
-	   assertEquals(false, t.insert(0));
+	   assertEquals(9, node.size());
+	   node.insert(8);
+	   node.insert(8); // IT WORKS :)
+	   assertEquals(node.children[2].children[1], node.find(7));
+	   assertEquals(node.children[0].children[2], node.get(1));
 	   //Node found = ;
 	  // assertEquals(node.children[0].children[0], t.find(node, 1));
 	  // assertEquals(null, t.find(node, 1000));

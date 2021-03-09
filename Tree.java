@@ -7,7 +7,7 @@ import java.util.Comparator;
  - Constructor with no parameters. Only one constructor.		DONE
  
  
- - insert(x) method 			Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO
+ - insert(x) method 			Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing TODO
  	- Discard duplicates
  	- Return true if element is added, false if not added (if duplicate then would return false)
  	- Use tree structure itself, nothing else.
@@ -17,19 +17,19 @@ import java.util.Comparator;
  	- split nodes. Might bubble upwards and cause chain of splitting.
  
  
- - find(root, val) 					Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO
+ - find(root, val) 					Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing TODO
  	- finds and returns the node containing that value. Returns null if not found, else returns node w/ value. Private method.
  	
  	
- - size() method 				DONE
+ - size() method 				Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> TODO
  	- returns the number of values in the tree. Includes values found in the same node.
  	
  	
- - size(int x) method			Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO
+ - size(int x) method			Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing TODO
  	- will return the int size of the subtree rooted at the node that contains integer x. (The size is the number of keys in that subtree.) If x is not in the tree, it should return 0.
  	
  	
- - get(x) method				TODO
+ - get(x) method				Implementation DONE -> Moved within Node class DONE -> Preliminary Testing TODO
  	- returns the item that would be at location x if the values in tree were sorted in ascending order (from least to largest, t.get(0) returns least item while t.get(t.size() - 1) returns largest item)
  	- Don't use any other structure, just use the 23 tree
  	
@@ -264,7 +264,7 @@ public class Tree {
 			// Checking right edge
 			//Just check rightmost. If rightmost val exists, then we go in and check if val > rightmost.
 			// If val > rightmost, check if rightmost child exists then recurse. Else just add to current node and call split
-			if(vals[MAX_VALS - 2] != null) {
+			if(vals[MAX_VALS - 2] != null) { 
 				if(val > vals[MAX_VALS - 2] && val != vals[MAX_VALS - 2]) {
 					
 					if(children[MAX_VALS - 1] != null) {
@@ -372,8 +372,6 @@ public class Tree {
 		// duplicates
 		public Node find(Integer target) { // Traverses tree until it finds a node w/ a matching value. If
 											// nothing is matching then return null
-			
-			
 			// ONLY checking if < than curr val in node, not greater than. This leaves the rightmost node not 
 			for(int i = 0; i < vals.length; i++) {
 				if(vals[i] != null) { // Value exists?
@@ -387,10 +385,8 @@ public class Tree {
 				}
 			}
 			
-			
-			
 			// When do we go to the right child? Never. So we must manually check it by making a manual visit to the right child.\
-			if(vals[MAX_VALS - 2] != null) {
+			if(vals[MAX_VALS - 2] != null) { // Do we have a rigthmost val?
 				if(target > vals[MAX_VALS - 2]) {
 					if(children[MAX_VALS - 1] != null) { // Space to move down
 						return children[MAX_VALS - 1].find(target);
@@ -398,15 +394,11 @@ public class Tree {
 				}else if(target == vals[MAX_VALS - 2]) {
 					return this;
 				}
+			}else if(target > vals[0] && children[MAX_VALS - 1] != null) {// Do we have a left most value who is less than our target? We will find it. Recurse.
+					return children[MAX_VALS - 1].find(target);
 			}
-			
-			
-			
-			
 			return null;
-			
 		}
-		
 
 		public int size() {
 			int currNodeCount = this.numVals();
@@ -418,7 +410,5 @@ public class Tree {
 			}
 			return currNodeCount;
 		}
-		
 	}
-	
 }
