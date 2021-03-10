@@ -69,31 +69,6 @@ public class Tree {
 		return root.get(index);
 	}
 
-
-	private void split(Node root) {
-
-		if (root == null) { // Base case #0
-			return;
-		}
-
-		// Are we below maximum capacity? Return. We're done.
-		if (root.numVals() != 3) { // Base case #1
-			return;
-		}
-
-		// Are we at the root of our tree?
-		if (root.parent == null) {// Base case #2
-			Node parent = new Node(root.getVal(1));
-
-			Node temp = root;
-
-			// parent.children.set(0, new Node(root.getVal(0), parent));// sets left child
-			// of new parent
-			// parent.children.set(1, new Node(root.getVal(2), parent)); // sets right child
-			// of new parent
-		}
-	}
-
 	public boolean insert(int x) {
 		int prevSize = this.size;
 		root.insert(x);
@@ -101,6 +76,8 @@ public class Tree {
 	}
 
 	class Node {
+		
+		//TODO: possible way to reformat children is have 0...n/2 be considered left and n/2 + 1 ...n be considered right. Just a thought.
 
 		private static final int MAX_VALS = 3; // i.e., therefore capacity is 2 and once we reach 3 we
 												// must split.
@@ -206,7 +183,7 @@ public class Tree {
 			if (index < MAX_VALS) {
 				vals[index] = null;
 			}
-			order();
+			//order();
 		}
 
 		// Get corresponding values from our node. We pass in an index and we get
@@ -220,31 +197,50 @@ public class Tree {
 		
 		private void split() {
 			if(numVals() == MAX_VALS) {// ie we have more values than should be allowed.
-				
 				if(parent == null) { // We are splitting and we are at the top of the tree. Guaranteed to have 4 illegal children.
-					
-					
-					
 					parent = new Node(vals[MAX_VALS / 2]); // 3/2 = 1.5 = 1
-					root = parent;
-					
 					
 					// Assigning parent's left children with node's left values.
 					for(int i = 0; i < MAX_VALS / 2; i++) { // [0,1) 
-						parent.children[i] = new Node(vals[i], parent);
+						parent.children[i] = new Node(vals[i], this);
+						
+						// Sets the leftmost 2 children to be the two only children of the recently split leftmost value.
+						for(int j = 0; j < MAX_CHILDREN / 2; j++) { // [0, 2) Ensures that 0 is leftmost child and 2 is right most child.
+							// Makes sure we only look at ever other child. Ensures we place our original children in positions 0 and 2
+							parent.children[i].children[(j == 0) ? j : j + 1] = this.children[j]; // Ensures we place children in position 2 from original node's 1 index child
+							
+							if(this.children[j] != null) {
+								this.children[(j == 0) ? j : ++j].parent = parent.children[i]; // Sets parent of old children to be our parent's children
+							}
+							// NOTE: Why (j==0)?j:j + 1 Because I am setting children[2] to be the rightmost child and otherwise it 
+							// would place what is supposed to be the rightmost child into children[1] which is where the middle child is supposed to go.
+						}
+						removeVal(i);// Removes value from current node because we have created a new node for it that will become a child.
 					}
 					// Assigning parent's right children with node's right values.
 					for(int i = MAX_VALS / 2 + 1; i < MAX_VALS; i++) { // [2, 3)
-						parent.children[i] = new Node(vals[i], parent);
+						parent.children[i] = new Node(vals[i], this); // creates new node and places it as child of new parent.
+						// Sets the leftmost 2 children to be the two only children of the recently split leftmost value.
+						for(int j = 0; j < MAX_CHILDREN / 2; j++) { // [0, 2) Ensures that 0 is leftmost child and 2 is right most child.
+							//Places 3rd child in leftmost child's position in new node, and places 4th child in rightmost child's position in new node.
+							parent.children[i].children[(j == 0) ? j : j + 1] = this.children[j + 2]; 
+							if(this.children[j + 2] != null) {
+								this.children[j + 2].parent = parent.children[i]; // Sets parent of old children to be our parent's children
+							}
+						}
+						removeVal(i); // Removes value from current node becase we have created a new node for it that will become a child.
 					}
+					order(); // Orders values accordingly to how I specified in order.
+					root = this; // Sets our current node to be the topmost root. 
+					children = parent.children; // Sets our new node's children equal to the new children.
+					parent = null;// Null since our topmost node will not have a parent
+				}else { // we are not at the root. Bubble mid value upwards. Recurse. TODO: WIP
 					
-					// At this point we have two trees. The smaller new one and the old one with children having children. Do something about that.
-					// I will merge these two trees.
 					
 					
 					
 					
-
+					
 				}
 			}
 		}
@@ -282,7 +278,7 @@ public class Tree {
 					}else {
 						this.addVal(val);
 						size++;
-						split(); //TODO: IMPLEMENT
+						split();
 					}	
 				}
 			}else { // else we only have one value in our node (23 tree)
@@ -300,7 +296,7 @@ public class Tree {
 		}
 		
 		
-		// TODO: Figure out which of these works
+		// TODO: Figure out which of these works... WIP RIP
 		/*
 		 * Observation: index of leftmost val in root is size of left subtree. Index of rightmost val is size of leftmost + size of midsubtree + 1
 		 */
@@ -332,12 +328,6 @@ public class Tree {
 					return children[i].get(targetIndex - nodeSkipped);
 				}
 			}
-			
-			
-			
-			
-			
-			
 /*
 			if (root.lfChild == null && root.midChild == null && root.rtChild == null) { // Are we in a leaf? BASE CASE
 				if (targetIndex == currIndex) { // Does the firstVal in leaf contain the index of item we look for?
@@ -370,15 +360,10 @@ public class Tree {
 			}
 
 			get(root.rtChild, targetIndex, ++currIndex);
-
-
 */
 			return null;
 		}
 		
-
-		
-
 		// Assumes nodes have been properly split (i.e., max vals per node is 2) and no
 		// duplicates
 		public Node find(Integer target) { // Traverses tree until it finds a node w/ a matching value. If
@@ -400,7 +385,7 @@ public class Tree {
 			if(vals[MAX_VALS - 2] != null) { // Do we have a rigthmost val?
 				if(target > vals[MAX_VALS - 2]) {
 					if(children[MAX_VALS - 1] != null) { // Space to move down
-						return children[MAX_VALS - 1].find(target);
+						return children[MAX_VALS - 1].find(target); // represents going down rightmost child
 					}
 				}else if(target == vals[MAX_VALS - 2]) {
 					return this;

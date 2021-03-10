@@ -59,6 +59,11 @@ public class Tests{
 	   Tree.Node node = t.new Node();
 	   
 	   
+	   node.insert(0);
+	   node.insert(1);
+	   node.insert(2);
+	   assertEquals(3, node.size());
+	   /*
 	   node.addVal(4);
 	   
 	   node.children[0] = t.new Node(2, node);
@@ -77,6 +82,7 @@ public class Tests{
 	   node.insert(8); // IT WORKS :)
 	   assertEquals(node.children[2].children[1], node.find(7));
 	   assertEquals(node.children[0].children[2], node.get(1));
+	   */
 	   //Node found = ;
 	  // assertEquals(node.children[0].children[0], t.find(node, 1));
 	  // assertEquals(null, t.find(node, 1000));
