@@ -64,34 +64,12 @@ public class Tree {
 		return node.size();
 	}
 
-
-	
-
 	public int get(int index) {
 
 		return root.get(index);
 	}
-	
 
 
-/*
-
-		/*
-		 * 
-		 * Integer leftValIndex = currIndex + size(root.lfChild); Integer rightValIndex
-		 * = null;
-		 * 
-		 * if(root.getVal(1) != null) {//ie we have a right val in our node
-		 * rightValIndex = leftValIndex + 1; if(root.midChild != null) { // ie we have a
-		 * middle child. rightValIndex+= size(root.midChild); } }
-		 * 
-		 * 
-		 * if(targetIndex < leftValIndex) { get(root.lfChild, targetIndex, 0); //
-		 * Travelling left, no need to account for trees in right subtree }
-		 * 
-		 */
-
-	// TODO: WIP... ...... :(
 	private void split(Node root) {
 
 		if (root == null) { // Base case #0
@@ -175,6 +153,16 @@ public class Tree {
 			}
 			return i;
 		}
+		
+		public int numChildren() {
+			int counter = 0;
+			for(int i = 0; i < children.length; i++) {
+				if(children[i] != null) {
+					counter++;
+				}
+			}
+			return counter;
+		}
 
 		public void addVal(int val) { // Assumes there is at least one null value in our array. Which there should
 										// because our node's capacity is 2, but we split once we reach 3. O(nlogn)
@@ -231,7 +219,34 @@ public class Tree {
 		}
 		
 		private void split() {
-			
+			if(numVals() == MAX_VALS) {// ie we have more values than should be allowed.
+				
+				if(parent == null) { // We are splitting and we are at the top of the tree. Guaranteed to have 4 illegal children.
+					
+					
+					
+					parent = new Node(vals[MAX_VALS / 2]); // 3/2 = 1.5 = 1
+					root = parent;
+					
+					
+					// Assigning parent's left children with node's left values.
+					for(int i = 0; i < MAX_VALS / 2; i++) { // [0,1) 
+						parent.children[i] = new Node(vals[i], parent);
+					}
+					// Assigning parent's right children with node's right values.
+					for(int i = MAX_VALS / 2 + 1; i < MAX_VALS; i++) { // [2, 3)
+						parent.children[i] = new Node(vals[i], parent);
+					}
+					
+					// At this point we have two trees. The smaller new one and the old one with children having children. Do something about that.
+					// I will merge these two trees.
+					
+					
+					
+					
+
+				}
+			}
 		}
 
 		// We are working with a valid tree.
@@ -239,14 +254,12 @@ public class Tree {
 			// Checks all vals except rightmost val.
 			for(int i = 0; i < MAX_VALS - 1; i++) {
 				
-				if(vals[0] == null) {
+				if(vals[0] == null) { // Is our first value null? Then we are in an empty node. Add it.
 					addVal(val);
 					size++;
 					return;
 				}
-				
 				if(vals[i] == null) continue; // Do we actually have an nth value? Or is it null?
-				
 				// Checks everything except rightmost value
 				if(val < vals[i] && val != vals[i]) {
 					if(children[i] == null) { // We are at a leaf, therefore just add val to node
@@ -259,14 +272,11 @@ public class Tree {
 					return; // We're done.
 				}
 			}
-			
-			
 			// Checking right edge
 			//Just check rightmost. If rightmost val exists, then we go in and check if val > rightmost.
 			// If val > rightmost, check if rightmost child exists then recurse. Else just add to current node and call split
 			if(vals[MAX_VALS - 2] != null) { 
 				if(val > vals[MAX_VALS - 2] && val != vals[MAX_VALS - 2]) {
-					
 					if(children[MAX_VALS - 1] != null) {
 						children[MAX_VALS - 1].insert(val);
 					}else {
@@ -286,12 +296,14 @@ public class Tree {
 					}
 				}
 			}
-			
 			return; // At the end, nothing to do.
 		}
 		
 		
-		// TODO: Figure out if this works
+		// TODO: Figure out which of these works
+		/*
+		 * Observation: index of leftmost val in root is size of left subtree. Index of rightmost val is size of leftmost + size of midsubtree + 1
+		 */
 		// In order for BST: left, visit, right. For 23 Tree I think it will be left,
 		// visit, mid, visit, right ?
 		// Assumes nodes do not exceed maxiumum (2). Assumes index exists in tree.
@@ -303,11 +315,10 @@ public class Tree {
 			int nodeSkipped = 0;
 			for(int i = 0; i < MAX_VALS - 1; i++) {
 				if(vals[i] != null) {
-					for(int j = 0; j < i; j++) {
+					for(int j = 0; j <= i; j++) {
 						if(children[j] != null) {
-							nodeSkipped = children[j].size();
+							nodeSkipped+= children[j].size();
 						}
-						nodeSkipped++;//Accounting for the previous val in our node
 					}
 					
 					if(targetIndex == 0 || targetIndex == nodeSkipped) {
@@ -400,7 +411,7 @@ public class Tree {
 			return null;
 		}
 
-		public int size() {
+		public int size() {// Iterates thru all children and adds their size to the sum. Then we return that sum.
 			int currNodeCount = this.numVals();
 			// Essentially iterating over children array and adding each to our count. 
 			for(int child = 0; child < children.length; child++) {
