@@ -29,7 +29,7 @@ import java.util.Comparator;
  	- will return the int size of the subtree rooted at the node that contains integer x. (The size is the number of keys in that subtree.) If x is not in the tree, it should return 0.
  	
  	
- - get(x) method				Implementation DONE -> Moved within Node class DONE -> Preliminary Testing TODO
+ - get(x) method				Implementation DONE -> Moved within Node class TODO
  	- returns the item that would be at location x if the values in tree were sorted in ascending order (from least to largest, t.get(0) returns least item while t.get(t.size() - 1) returns largest item)
  	- Don't use any other structure, just use the 23 tree
  	
@@ -75,20 +75,16 @@ public class Tree {
 		return prevSize != this.size;
 	}
 
-	class Node {
+	private class Node {
 		
 		//TODO: possible way to reformat children is have 0...n/2 be considered left and n/2 + 1 ...n be considered right. Just a thought.
 
 		private static final int MAX_VALS = 3; // i.e., therefore capacity is 2 and once we reach 3 we
 												// must split.
-
 		private static final int MAX_CHILDREN = 4;
-
 		public Integer[] vals; // Keeps track of values in a node (referred to as 'keys' in video). // 0 =
 								// leftmost, 1 = rightmost, etc
-
 		public Node parent; // I will need a reference to the parent to split and maybe get
-
 		public Node[] children;
 
 		public Node(Integer x, Node parent) {
@@ -101,7 +97,6 @@ public class Tree {
 
 		public Node(Integer x) {
 			vals = new Integer[MAX_VALS];
-			// children = new ArrayList<Node>();
 			addVal(x);
 			resetChildren();
 			this.parent = null;
@@ -158,9 +153,7 @@ public class Tree {
 		}
 
 		// nlogn. Orders values
-		private void order() {// Makes sure our vals within node are ordered properly. TODO: Maybe make it
-								// faster?
-
+		private void order() {// Makes sure our vals within node are ordered properly. TODO: Maybe make it faster?
 			// Custom sort that treats null as negative infinity
 			Arrays.sort(vals, new Comparator<Integer>() {
 				@Override
@@ -242,7 +235,6 @@ public class Tree {
 							parent.children[i - 1] = new Node(vals[0], parent);
 							removeVal(0);
 						}
-						
 					}else { // means our parent now has 3 values. Create the 4 children then recurse. 
 						for(int i = parent.numChildren() - 1; i < MAX_CHILDREN - 1; i++) {
 							parent.children[i + 1] = new Node(vals[i]);
@@ -254,13 +246,10 @@ public class Tree {
 			}
 		}
 		
-
-
 		// We are working with a valid tree.
 		public void insert(int val) { // I am essentially using DFS
 			// Checks all vals except rightmost val.
 			for(int i = 0; i < MAX_VALS - 1; i++) {
-				
 				if(vals[0] == null) { // Is our first value null? Then we are in an empty node. Add it.
 					addVal(val);
 					size++;
@@ -307,7 +296,7 @@ public class Tree {
 		}
 		
 		
-		// TODO: Figure out which of these works... WIP RIP
+		// TODO: Figure out which of these approaches works... WIP RIP
 		/*
 		 * Observation: index of leftmost val in root is size of left subtree. Index of rightmost val is size of leftmost + size of midsubtree + 1
 		 */
@@ -316,8 +305,6 @@ public class Tree {
 		// Assumes nodes do not exceed maxiumum (2). Assumes index exists in tree.
 		public Integer get(int targetIndex) {
 			// "I will not call it with values that are supposed to be out of bounds."
-			
-			
 			// Index of val a is size of left subtree. Index of right val is size of leftsubtree + size of Mid subtree + 1.
 			int nodeSkipped = 0;
 			for(int i = 0; i < MAX_VALS - 1; i++) {
@@ -327,11 +314,9 @@ public class Tree {
 							nodeSkipped+= children[j].size();
 						}
 					}
-					
 					if(targetIndex == 0 || targetIndex == nodeSkipped) {
 						return vals[i];
 					}
-					
 					if(targetIndex < nodeSkipped) {
 						return children[i].get(targetIndex - nodeSkipped);
 					}
@@ -348,9 +333,7 @@ public class Tree {
 					return root.getVal(1);
 				}
 			}
-
 			get(root.lfChild, targetIndex, ++currIndex); // Go as far down the left subtree as possible.
-
 			if (targetIndex == currIndex) { // If we get here it's because we didn't find anything in left subtrees. Check
 											// if maybe this node has our val
 				return root.getVal(0);
@@ -358,18 +341,15 @@ public class Tree {
 														// am
 				return root.getVal(1);
 			}
-
 			get(root.midChild, targetIndex, ++currIndex); // Means we didnt find val in left subtree. Go back to where we
 															// started going down left subtree and
 															// go down to midChild, then start going down left subtree
 															// again.
-
 			if (targetIndex == currIndex) {
 				return root.getVal(0);
 			} else if (targetIndex == ++currIndex) { // TODO: Will this line work? Probably not. Index is not linear
 				return root.getVal(1);
 			}
-
 			get(root.rtChild, targetIndex, ++currIndex);
 */
 			return null;
@@ -391,7 +371,6 @@ public class Tree {
 					}
 				}
 			}
-			
 			// When do we go to the right child? Never. So we must manually check it by making a manual visit to the right child.\
 			if(vals[MAX_VALS - 2] != null) { // Do we have a rigthmost val?
 				if(target > vals[MAX_VALS - 2]) {

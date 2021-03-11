@@ -46,15 +46,14 @@ public class Tests{
       assertEquals(2, t.size(15));
       assertEquals(0, t.size(18));
       
-      //assertEquals(9, t.get(0));
-     // assertEquals(15, t.get(1));
-
+      assertEquals(9, t.get(0));
+      assertEquals(15, t.get(1));
    }
    
    /*
    Illegal tests that require node to be separate public/protected class. Requires private methods to be public. Requires illegal tree constructor.
    Used for testing real 23 trees since I can't get my split to work.
-  */
+  
 
    @Test
    public void manualTestOfTreeUsingIllegalNodeAndTree() {
@@ -82,7 +81,7 @@ public class Tests{
    }
 
   
-	
+	*/
 	
 
    @Test
@@ -102,9 +101,9 @@ public class Tests{
       assertEquals(0, t.size(0));
       assertEquals(0, t.size(3));
 
-     // assertEquals(1, t.get(0));
-     // assertEquals(9, t.get(1));
-      //assertEquals(15, t.get(2));
+      assertEquals(1, t.get(0));
+      assertEquals(9, t.get(1));
+      assertEquals(15, t.get(2));
       
       assertEquals(3,t.size());
    }
@@ -126,9 +125,9 @@ public class Tests{
       assertEquals(0, t.size(0));
       assertEquals(0, t.size(3));
       
-     // assertEquals(1, t.get(0));
-      //assertEquals(9, t.get(1));
-      //assertEquals(15, t.get(2));
+     assertEquals(1, t.get(0));
+      assertEquals(9, t.get(1));
+      assertEquals(15, t.get(2));
       assertEquals(3,t.size());
 
 
@@ -151,14 +150,14 @@ public class Tests{
       assertEquals(0, t.size(0));
       assertEquals(0, t.size(3));
       
-     // assertEquals(1, t.get(0));
-     // assertEquals(9, t.get(1));
-     // assertEquals(15, t.get(2));
+     assertEquals(1, t.get(0));
+     assertEquals(9, t.get(1));
+     assertEquals(15, t.get(2));
       assertEquals(3,t.size());
 
 
    }
-   /*
+   
    
    @Test
    public void testDuplicates()
@@ -218,5 +217,5 @@ public class Tests{
 
    }
 
-*/
+
 }
