@@ -13,7 +13,7 @@ import java.util.Comparator;
  	- Use tree structure itself, nothing else.
  	
  	
- - split(Node root)				Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO make sure that parent is assigned correctly
+ - split(Node root)				Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO make sure that parent is assigned correctly. Fix cc bug
  	- split nodes. Might bubble upwards and cause chain of splitting.
  
  
@@ -200,7 +200,7 @@ public class Tree {
 						for(int j = 0; j < MAX_CHILDREN / 2; j++) { // [0, 2) Ensures that 0 is leftmost child and 2 is right most child.
 							// Makes sure we only look at ever other child. Ensures we place our original children in positions 0 and 2
 							parent.children[i].children[(j == 0) ? j : j + 1] = this.children[j]; // Ensures we place children in position 2 from original node's 1 index child
-							if(this.children[j] != null) {
+							if(this.children[j] != null) { // TODO: Fix bug in this area
 								this.children[(j == 0) ? j : j + 1].parent = parent.children[i]; // Sets parent of old children to be our parent's children
 							}
 							// NOTE: Why (j==0)?j:j + 1 Because I am setting children[2] to be the rightmost child and otherwise it 
@@ -215,7 +215,7 @@ public class Tree {
 						for(int j = 0; j < MAX_CHILDREN / 2; j++) { // [0, 2) Ensures that 0 is leftmost child and 2 is right most child.
 							//Places 3rd child in leftmost child's position in new node, and places 4th child in rightmost child's position in new node.
 							parent.children[i].children[(j == 0) ? j : j + 1] = this.children[j + 2]; 
-							if(this.children[j + 2] != null) {
+							if(this.children[j + 2] != null) { // TODO: fix bug in this area
 								this.children[j + 2].parent = parent.children[i]; // Sets parent of old children to be our parent's children
 							}
 						}
@@ -281,8 +281,7 @@ public class Tree {
 						split();
 					}
 				}
-			}else { // else we only have one value in our node (23 tree)
-				if(val > vals[0]) {
+			}else if(val > vals[0] && val != vals[0]) {
 					if(children[MAX_VALS - 1] != null) {
 						children[MAX_VALS - 1].insert(val);
 					} else if (children[MAX_VALS - 1] == null) {
@@ -291,7 +290,7 @@ public class Tree {
 						split();
 					}
 				}
-			}
+			
 			return; // At the end, nothing to do.
 		}
 		
@@ -306,6 +305,11 @@ public class Tree {
 		public Integer get(int targetIndex) {
 			// "I will not call it with values that are supposed to be out of bounds."
 			// Index of val a is size of left subtree. Index of right val is size of leftsubtree + size of Mid subtree + 1.
+			
+			
+			if (targetIndex < MAX_VALS) {
+				return vals[targetIndex];
+			}
 			int nodeSkipped = 0;
 			for(int i = 0; i < MAX_VALS - 1; i++) {
 				if(vals[i] != null) {
