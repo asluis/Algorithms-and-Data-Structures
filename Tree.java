@@ -13,7 +13,7 @@ import java.util.Comparator;
  	- Use tree structure itself, nothing else.
  	
  	
- - split(Node root)				TODO
+ - split(Node root)				TODO WIP
  	- split nodes. Might bubble upwards and cause chain of splitting.
  
  
@@ -133,7 +133,7 @@ public class Tree {
 		
 		public int numChildren() {
 			int counter = 0;
-			for(int i = 0; i < children.length; i++) {
+			for(int i = 0; i < MAX_CHILDREN; i++) {
 				if(children[i] != null) {
 					counter++;
 				}
@@ -195,20 +195,18 @@ public class Tree {
 			return -1; // Returns -1 if out of bounds
 		}
 		
+		// Splits node. Finally working :)
 		private void split() {
 			if(numVals() == MAX_VALS) {// ie we have more values than should be allowed.
 				if(parent == null) { // We are splitting and we are at the top of the tree. Guaranteed to have 4 illegal children.
 					parent = new Node(vals[MAX_VALS / 2]); // 3/2 = 1.5 = 1
-					
 					// Assigning parent's left children with node's left values.
 					for(int i = 0; i < MAX_VALS / 2; i++) { // [0,1) 
 						parent.children[i] = new Node(vals[i], this);
-						
 						// Sets the leftmost 2 children to be the two only children of the recently split leftmost value.
 						for(int j = 0; j < MAX_CHILDREN / 2; j++) { // [0, 2) Ensures that 0 is leftmost child and 2 is right most child.
 							// Makes sure we only look at ever other child. Ensures we place our original children in positions 0 and 2
 							parent.children[i].children[(j == 0) ? j : j + 1] = this.children[j]; // Ensures we place children in position 2 from original node's 1 index child
-							
 							if(this.children[j] != null) {
 								this.children[(j == 0) ? j : ++j].parent = parent.children[i]; // Sets parent of old children to be our parent's children
 							}
@@ -234,16 +232,28 @@ public class Tree {
 					root = this; // Sets our current node to be the topmost root. 
 					children = parent.children; // Sets our new node's children equal to the new children.
 					parent = null;// Null since our topmost node will not have a parent
-				}else { // we are not at the root. Bubble mid value upwards. Recurse. TODO: WIP
-					
-					
-					
-					
-					
-					
+				}else {
+					parent.addVal(vals[MAX_VALS / 2]);
+					removeVal(MAX_VALS / 2);
+					order(); // Moves remaining vals in node to positions 0,1
+					// Converrt the values in the node into children. The children will belong to this node's parent.
+					if(parent.numVals() == 2) { // Guarantees 2 children already exist. We added one.
+						for(int i = parent.numChildren(); i < MAX_CHILDREN - 1; i++) {
+							parent.children[i - 1] = new Node(vals[0], parent);
+							removeVal(0);
+						}
+						
+					}else { // means our parent now has 3 values. Create the 4 children then recurse.
+						for(int i = parent.numChildren(); i < MAX_CHILDREN; i++) {
+							parent.children[i + 1] = new Node(vals[i - 1]);
+							removeVal(i - 1);
+						}
+					}	
 				}
 			}
 		}
+		
+
 
 		// We are working with a valid tree.
 		public void insert(int val) { // I am essentially using DFS
