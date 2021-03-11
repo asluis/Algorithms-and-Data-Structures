@@ -13,7 +13,7 @@ import java.util.Comparator;
  	- Use tree structure itself, nothing else.
  	
  	
- - split(Node root)				TODO WIP
+ - split(Node root)				Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO make sure that parent is assigned correctly
  	- split nodes. Might bubble upwards and cause chain of splitting.
  
  
@@ -195,7 +195,7 @@ public class Tree {
 			return -1; // Returns -1 if out of bounds
 		}
 		
-		// Splits node. Finally working :)
+		// Splits node. FINALLY WORKS :)
 		private void split() {
 			if(numVals() == MAX_VALS) {// ie we have more values than should be allowed.
 				if(parent == null) { // We are splitting and we are at the top of the tree. Guaranteed to have 4 illegal children.
@@ -208,7 +208,7 @@ public class Tree {
 							// Makes sure we only look at ever other child. Ensures we place our original children in positions 0 and 2
 							parent.children[i].children[(j == 0) ? j : j + 1] = this.children[j]; // Ensures we place children in position 2 from original node's 1 index child
 							if(this.children[j] != null) {
-								this.children[(j == 0) ? j : ++j].parent = parent.children[i]; // Sets parent of old children to be our parent's children
+								this.children[(j == 0) ? j : j + 1].parent = parent.children[i]; // Sets parent of old children to be our parent's children
 							}
 							// NOTE: Why (j==0)?j:j + 1 Because I am setting children[2] to be the rightmost child and otherwise it 
 							// would place what is supposed to be the rightmost child into children[1] which is where the middle child is supposed to go.
@@ -235,7 +235,7 @@ public class Tree {
 				}else {
 					parent.addVal(vals[MAX_VALS / 2]);
 					removeVal(MAX_VALS / 2);
-					order(); // Moves remaining vals in node to positions 0,1
+					//order(); // Moves remaining vals in node to positions 0,1
 					// Converrt the values in the node into children. The children will belong to this node's parent.
 					if(parent.numVals() == 2) { // Guarantees 2 children already exist. We added one.
 						for(int i = parent.numChildren(); i < MAX_CHILDREN - 1; i++) {
@@ -243,11 +243,12 @@ public class Tree {
 							removeVal(0);
 						}
 						
-					}else { // means our parent now has 3 values. Create the 4 children then recurse.
-						for(int i = parent.numChildren(); i < MAX_CHILDREN; i++) {
-							parent.children[i + 1] = new Node(vals[i - 1]);
-							removeVal(i - 1);
+					}else { // means our parent now has 3 values. Create the 4 children then recurse. 
+						for(int i = parent.numChildren() - 1; i < MAX_CHILDREN - 1; i++) {
+							parent.children[i + 1] = new Node(vals[i]);
+							removeVal(i);
 						}
+						parent.split();
 					}	
 				}
 			}
@@ -289,7 +290,7 @@ public class Tree {
 						this.addVal(val);
 						size++;
 						split();
-					}	
+					}
 				}
 			}else { // else we only have one value in our node (23 tree)
 				if(val > vals[0]) {
