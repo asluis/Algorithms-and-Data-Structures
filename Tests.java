@@ -75,12 +75,8 @@ public class Tests{
 	   node.insert(5);
 	   assertEquals(6, node.size());
 	   assertEquals(node.children[2], node.find(5)); // IT'S WORKING
-	   
-	   node.insert(6); // Will causes a double split... I pray to god this will work
-	   
+	   node.insert(6); // Will causes a double split... I pray to god this will work   
    }
-
-  
 	*/
 	
 
@@ -212,9 +208,6 @@ public class Tests{
       ////assertEquals(15, t.get(5));
       //assertEquals(20, t.get(6));
       assertEquals(7,t.size());
-
-      
-
    }
 
 

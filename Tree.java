@@ -76,9 +76,6 @@ public class Tree {
 	}
 
 	private class Node {
-		
-		//TODO: possible way to reformat children is have 0...n/2 be considered left and n/2 + 1 ...n be considered right. Just a thought.
-
 		private static final int MAX_VALS = 3; // i.e., therefore capacity is 2 and once we reach 3 we
 												// must split.
 		private static final int MAX_CHILDREN = 4;
@@ -86,6 +83,9 @@ public class Tree {
 								// leftmost, 1 = rightmost, etc
 		public Node parent; // I will need a reference to the parent to split and maybe get
 		public Node[] children;
+		
+		private int numVals = 0;
+		private int numChildren = 0;
 
 		public Node(Integer x, Node parent) {
 			vals = new Integer[MAX_VALS];
@@ -107,6 +107,7 @@ public class Tree {
 			// children = new ArrayList<Node>();
 			resetChildren();
 			parent = null;
+			
 		}
 
 		private void resetChildren() {
@@ -114,42 +115,52 @@ public class Tree {
 			for (int i = 0; i < MAX_CHILDREN; i++) {
 				children[i] = null;
 			}
-		}
-
-		public int numVals() {
-			int i = 0;
-			for (; i < MAX_VALS; i++) {
-				if (vals[i] == null) {
-					return i;
-				}
-			}
-			return i;
+			numChildren = 0;
 		}
 		
-		public int numChildren() {
-			int counter = 0;
-			for(int i = 0; i < MAX_CHILDREN; i++) {
-				if(children[i] != null) {
-					counter++;
-				}
+		public void addChild(Integer value) {
+			if(numChildren < MAX_CHILDREN) {
+				children[numChildren] = new Node(value, this);
+				numChildren++;	
+				orderChildren();
 			}
-			return counter;
+		}
+		
+		public void removeChild(int index) {
+			if (index < MAX_CHILDREN && index < numChildren) {
+				children[index] = null;
+				numChildren--;
+				orderChildren();
+			}
 		}
 
 		public void addVal(int val) { // Assumes there is at least one null value in our array. Which there should
 										// because our node's capacity is 2, but we split once we reach 3. O(nlogn)
-			int i = 0;
-			for (; i < MAX_VALS; i++) {
-				if (vals[i] == null) {
-					vals[i] = val;
-					break; // We found a null? Then we add our digit there.
-				}
-				if(vals[i] == val) { // aka don't add it. // Extra layer of safety
-					size--;
-					return;
-				}
+			if(numVals < MAX_VALS) {
+				vals[numVals] = val;
+				numVals++;
+				size++;
+				order();
 			}
-			order();
+		}
+		
+		private void orderChildren() {
+			Arrays.sort(children, new Comparator<Node>() {
+				@Override
+				public int compare(Node a, Node b) {
+					Node aChild = a.children[0];
+					Node bChild = b.children[0];
+
+					if(aChild != null && bChild != null) {
+						return Integer.compare(aChild.vals[0], bChild.vals[0]);
+					} else if(aChild != null && bChild == null) {
+						return 1;
+					}else if(aChild == null && bChild != null) {
+						return -1;
+					}
+					return 0; // both null, therefore same weight
+				}
+			});
 		}
 
 		// nlogn. Orders values
@@ -173,10 +184,10 @@ public class Tree {
 
 		// Resets a particular value in our node to null;
 		public void removeVal(int index) {
-			if (index < MAX_VALS) {
+			if (index < MAX_VALS && index < numVals) {
 				vals[index] = null;
+				numVals--;
 			}
-			//order();
 		}
 
 		// Get corresponding values from our node. We pass in an index and we get
@@ -241,7 +252,7 @@ public class Tree {
 							removeVal(i);
 						}
 						parent.split();
-					}	
+					}
 				}
 			}
 		}
@@ -249,10 +260,18 @@ public class Tree {
 		// We are working with a valid tree.
 		public void insert(int val) { // I am essentially using DFS
 			// Checks all vals except rightmost val.
+			
+			if(numVals == 0) {
+				addVal(val); // first insertion into this node.
+				return;
+			}
+			for(int i = 0; i < numVals; i++) {
+				
+			}
+			
 			for(int i = 0; i < MAX_VALS - 1; i++) {
 				if(vals[0] == null) { // Is our first value null? Then we are in an empty node. Add it.
 					addVal(val);
-					size++;
 					return;
 				}
 				if(vals[i] == null) continue; // Do we actually have an nth value? Or is it null?
@@ -260,7 +279,7 @@ public class Tree {
 				if(val < vals[i] && val != vals[i]) {
 					if(children[i] == null) { // We are at a leaf, therefore just add val to node
 						this.addVal(val);
-						size++;
+						
 						split(); //TODO: IMPLEMENT
 					}else { // Still space to move down
 						children[i].insert(val);
@@ -277,7 +296,6 @@ public class Tree {
 						children[MAX_VALS - 1].insert(val);
 					}else {
 						this.addVal(val);
-						size++;
 						split();
 					}
 				}
@@ -286,7 +304,6 @@ public class Tree {
 						children[MAX_VALS - 1].insert(val);
 					} else if (children[MAX_VALS - 1] == null) {
 						addVal(val);
-						size++;
 						split();
 					}
 				}
@@ -363,40 +380,26 @@ public class Tree {
 		// duplicates
 		public Node find(Integer target) { // Traverses tree until it finds a node w/ a matching value. If
 											// nothing is matching then return null
-			// ONLY checking if < than curr val in node, not greater than. This leaves the rightmost node not 
-			for(int i = 0; i < vals.length; i++) {
-				if(vals[i] != null) { // Value exists?
-					if(target < vals[i]) { // Value lessthan our target?
-						if(children[i] != null) { // Recurse downwards
-							return children[i].find(target);
-						}
-					}else if(vals[i] == target) { // We found the node! Return it
-						return this;
-					}
-				}
-			}
-			// When do we go to the right child? Never. So we must manually check it by making a manual visit to the right child.\
-			if(vals[MAX_VALS - 2] != null) { // Do we have a rigthmost val?
-				if(target > vals[MAX_VALS - 2]) {
-					if(children[MAX_VALS - 1] != null) { // Space to move down
-						return children[MAX_VALS - 1].find(target); // represents going down rightmost child
-					}
-				}else if(target == vals[MAX_VALS - 2]) {
+			// ONLY checking if < than curr val in node, not greater than. This leaves the rightmost node not checked 
+			for(int i = 0; i < numVals; i++) {
+				if(target < vals[i]) {
+					return children[i].find(target);
+				}else if(target == vals[i]) {
 					return this;
 				}
-			}else if(target > vals[0] && children[MAX_VALS - 1] != null) {// Do we have a left most value who is less than our target? We will find it. Recurse.
-					return children[MAX_VALS - 1].find(target);
 			}
-			return null;
+			// Haven't checked if target is greater than rightmost value. IF so recurse downwards
+			if(target > vals[numVals - 1]) { // -1 to account for 0 based indexing
+				return children[numVals].find(target);
+			}
+			return null; // means not found
 		}
 
 		public int size() {// Iterates thru all children and adds their size to the sum. Then we return that sum.
-			int currNodeCount = this.numVals();
+			int currNodeCount = numVals;
 			// Essentially iterating over children array and adding each to our count. 
-			for(int child = 0; child < children.length; child++) {
-				if(children[child] != null) {
-					currNodeCount += children[child].size();
-				}
+			for(int child = 0; child < numChildren; child++) {
+				currNodeCount += children[child].size();
 			}
 			return currNodeCount;
 		}
