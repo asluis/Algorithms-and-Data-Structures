@@ -119,9 +119,24 @@ public class Tree {
 		}
 		
 		public void addChild(Integer value) {
+			if(numChildren == 0) {
+				children[0] = new Node(value, this);
+				numChildren++;
+				return;
+			}
 			if(numChildren < MAX_CHILDREN) {
-				children[numChildren] = new Node(value, this);
+				children[numChildren - 1] = new Node(value, this);
+				children[numChildren - 1].parent = this;
 				numChildren++;	
+				orderChildren();
+			}
+		}
+		
+		public void addChild(Node child) {
+			if(numChildren < MAX_CHILDREN) {
+				child.parent = this;
+				children[numChildren - 1] = child;
+				numChildren++;
 				orderChildren();
 			}
 		}
@@ -187,6 +202,7 @@ public class Tree {
 			if (index < MAX_VALS && index < numVals) {
 				vals[index] = null;
 				numVals--;
+				order();
 			}
 		}
 
@@ -201,58 +217,34 @@ public class Tree {
 		
 		// Splits node. FINALLY WORKS :)
 		private void split() {
-			if(numVals() == MAX_VALS) {// ie we have more values than should be allowed.
-				if(parent == null) { // We are splitting and we are at the top of the tree. Guaranteed to have 4 illegal children.
-					parent = new Node(vals[MAX_VALS / 2]); // 3/2 = 1.5 = 1
-					// Assigning parent's left children with node's left values.
-					for(int i = 0; i < MAX_VALS / 2; i++) { // [0,1) 
-						parent.children[i] = new Node(vals[i], this);
-						// Sets the leftmost 2 children to be the two only children of the recently split leftmost value.
-						for(int j = 0; j < MAX_CHILDREN / 2; j++) { // [0, 2) Ensures that 0 is leftmost child and 2 is right most child.
-							// Makes sure we only look at ever other child. Ensures we place our original children in positions 0 and 2
-							parent.children[i].children[(j == 0) ? j : j + 1] = this.children[j]; // Ensures we place children in position 2 from original node's 1 index child
-							if(this.children[j] != null) { // TODO: Fix bug in this area
-								this.children[(j == 0) ? j : j + 1].parent = parent.children[i]; // Sets parent of old children to be our parent's children
-							}
-							// NOTE: Why (j==0)?j:j + 1 Because I am setting children[2] to be the rightmost child and otherwise it 
-							// would place what is supposed to be the rightmost child into children[1] which is where the middle child is supposed to go.
-						}
-						removeVal(i);// Removes value from current node because we have created a new node for it that will become a child.
-					}
-					// Assigning parent's right children with node's right values.
-					for(int i = MAX_VALS / 2 + 1; i < MAX_VALS; i++) { // [2, 3)
-						parent.children[i] = new Node(vals[i], this); // creates new node and places it as child of new parent.
-						// Sets the leftmost 2 children to be the two only children of the recently split leftmost value.
-						for(int j = 0; j < MAX_CHILDREN / 2; j++) { // [0, 2) Ensures that 0 is leftmost child and 2 is right most child.
-							//Places 3rd child in leftmost child's position in new node, and places 4th child in rightmost child's position in new node.
-							parent.children[i].children[(j == 0) ? j : j + 1] = this.children[j + 2]; 
-							if(this.children[j + 2] != null) { // TODO: fix bug in this area
-								this.children[j + 2].parent = parent.children[i]; // Sets parent of old children to be our parent's children
-							}
-						}
-						removeVal(i); // Removes value from current node becase we have created a new node for it that will become a child.
-					}
-					order(); // Orders values accordingly to how I specified in order.
-					root = this; // Sets our current node to be the topmost root. 
-					children = parent.children; // Sets our new node's children equal to the new children.
-					parent = null;// Null since our topmost node will not have a parent
-				}else {
-					parent.addVal(vals[MAX_VALS / 2]);
-					removeVal(MAX_VALS / 2);
-					//order(); // Moves remaining vals in node to positions 0,1
-					// Converrt the values in the node into children. The children will belong to this node's parent.
-					if(parent.numVals() == 2) { // Guarantees 2 children already exist. We added one.
-						for(int i = parent.numChildren(); i < MAX_CHILDREN - 1; i++) {
-							parent.children[i - 1] = new Node(vals[0], parent);
-							removeVal(0);
-						}
-					}else { // means our parent now has 3 values. Create the 4 children then recurse. 
-						for(int i = parent.numChildren() - 1; i < MAX_CHILDREN - 1; i++) {
-							parent.children[i + 1] = new Node(vals[i]);
-							removeVal(i);
-						}
-						parent.split();
-					}
+			// Two cases. One where parent is null, and the other when it isn't
+			if(parent == null) {
+				parent = new Node(vals[(numVals - 1) / 2], null); // creates a new parent
+				removeVal((numVals - 1) / 2);
+				while(numVals != 0) {// Converting current values to children of parent.
+					parent.addChild(vals[0]);
+					removeVal(0);
+				}
+				// Now we have a bunch of unassigned children. Assign them to parent's new children
+				adjustSplitNodeChildren();
+			}else {// Means we have a parent.
+				
+				parent.addVal(vals[(numVals - 1) / 2]); // Pushing middle value upwards
+				removeVal((numVals - 1) / 2);
+				while(numVals > 0) { // Converting all values to children. Done so in order.
+					parent.addChild(new Node(vals[0]));
+					removeVal(0);
+				}
+				adjustSplitNodeChildren();
+			}
+			if(parent.numVals >= MAX_VALS) parent.split(); // Recursively calls split if necessary.
+		}
+		
+		// might be slightly specific to 23 trees. Will not be general enough for a B tree.
+		private void adjustSplitNodeChildren() {
+			for(int i = 1; i < parent.numChildren; i++) { // Starts at 1 
+				for(int j = 0 + ((i-1) * MAX_CHILDREN / 2); j < MAX_CHILDREN / 2; j++) {
+					parent.children[i].children[j] = children[j];
 				}
 			}
 		}
@@ -260,54 +252,28 @@ public class Tree {
 		// We are working with a valid tree.
 		public void insert(int val) { // I am essentially using DFS
 			// Checks all vals except rightmost val.
-			
-			if(numVals == 0) {
-				addVal(val); // first insertion into this node.
-				return;
-			}
+			if(numVals == 0) addVal(val); // first val to be added to this node. Just do it.
 			for(int i = 0; i < numVals; i++) {
-				
-			}
-			
-			for(int i = 0; i < MAX_VALS - 1; i++) {
-				if(vals[0] == null) { // Is our first value null? Then we are in an empty node. Add it.
-					addVal(val);
-					return;
-				}
-				if(vals[i] == null) continue; // Do we actually have an nth value? Or is it null?
-				// Checks everything except rightmost value
-				if(val < vals[i] && val != vals[i]) {
-					if(children[i] == null) { // We are at a leaf, therefore just add val to node
-						this.addVal(val);
-						
-						split(); //TODO: IMPLEMENT
-					}else { // Still space to move down
+				if(val == vals[i]) return; // As soon as we find an equal value, just end it.
+				if(val < vals[i]) {
+					if(children[i] != null) {// Do we have more room to recurse? Do it
 						children[i].insert(val);
+						return;
+					}else if(children[i] == null) { // No more room to recurse. We have reached a leaf, add val to our current node.
+						addVal(val);
+						if(numVals >= MAX_VALS) split();
+						return;
 					}
-					return; // We're done.
 				}
 			}
-			// Checking right edge
-			//Just check rightmost. If rightmost val exists, then we go in and check if val > rightmost.
-			// If val > rightmost, check if rightmost child exists then recurse. Else just add to current node and call split
-			if(vals[MAX_VALS - 2] != null) { 
-				if(val > vals[MAX_VALS - 2] && val != vals[MAX_VALS - 2]) {
-					if(children[MAX_VALS - 1] != null) {
-						children[MAX_VALS - 1].insert(val);
-					}else {
-						this.addVal(val);
-						split();
-					}
+			// Checking if our value is greater than the rightmost val in our node.
+			if(val > vals[numVals - 1]) { // -1 to account for 0 based indexing
+				if(children[numVals] != null) children[numVals].insert(val);
+				if(children[numVals] == null) {
+					addVal(val); // at a leaf, just add the value to our node.
+					if(numVals >= MAX_VALS) split();
 				}
-			}else if(val > vals[0] && val != vals[0]) {
-					if(children[MAX_VALS - 1] != null) {
-						children[MAX_VALS - 1].insert(val);
-					} else if (children[MAX_VALS - 1] == null) {
-						addVal(val);
-						split();
-					}
-				}
-			
+			}
 			return; // At the end, nothing to do.
 		}
 		
@@ -382,14 +348,14 @@ public class Tree {
 											// nothing is matching then return null
 			// ONLY checking if < than curr val in node, not greater than. This leaves the rightmost node not checked 
 			for(int i = 0; i < numVals; i++) {
-				if(target < vals[i]) {
+				if(target < vals[i] && children[i] != null) {
 					return children[i].find(target);
 				}else if(target == vals[i]) {
 					return this;
 				}
 			}
 			// Haven't checked if target is greater than rightmost value. IF so recurse downwards
-			if(target > vals[numVals - 1]) { // -1 to account for 0 based indexing
+			if(target > vals[numVals - 1] && children[numVals] != null) { // -1 to account for 0 based indexing
 				return children[numVals].find(target);
 			}
 			return null; // means not found
