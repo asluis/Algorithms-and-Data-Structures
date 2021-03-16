@@ -159,22 +159,22 @@ public class Tests{
    public void testDuplicates()
    {
       Tree t = new Tree();
-      t.insert(1);//
-      t.insert(9);//
-      t.insert(15);//
-      t.insert(13);//
-      t.insert(20);//
-      t.insert(7);//
-      t.insert(4);//
+      t.insert(1);// unique
+      t.insert(9);// unique
+      t.insert(15);// unique // split
+      t.insert(13);// unique
+      t.insert(20);// unique // split right
+      t.insert(7);// unique 
+      t.insert(4);// unique // split left // double split
       t.insert(1);
       t.insert(9);
       t.insert(15);
       t.insert(1);
       t.insert(9);
       t.insert(15);
-      t.insert(13);// bad
-      t.insert(20);// bad
-      t.insert(7);// bad
+      t.insert(13);
+      t.insert(20);
+      t.insert(7);
       t.insert(4);
       t.insert(13);
       t.insert(20);

@@ -125,13 +125,13 @@ public class Tree {
 				return;
 			}
 			if(numChildren < MAX_CHILDREN) {
-				children[numChildren - 1] = new Node(value, this);
-				children[numChildren - 1].parent = this;
+				children[numChildren] = new Node(value, this);
 				numChildren++;	
-				orderChildren();
+				//orderChildren();
 			}
 		}
 		
+		/*
 		public void addChild(Node child) {
 			if(numChildren < MAX_CHILDREN) {
 				child.parent = this;
@@ -140,6 +140,7 @@ public class Tree {
 				orderChildren();
 			}
 		}
+		*/
 		
 		public void removeChild(int index) {
 			if (index < MAX_CHILDREN && index < numChildren) {
@@ -158,19 +159,19 @@ public class Tree {
 				order();
 			}
 		}
+
 		
 		private void orderChildren() {
-			Arrays.sort(children, new Comparator<Node>() {
+			
+			
+			Arrays.sort(parent.children, new Comparator<Node>() {
 				@Override
 				public int compare(Node a, Node b) {
-					Node aChild = a.children[0];
-					Node bChild = b.children[0];
-
-					if(aChild != null && bChild != null) {
-						return Integer.compare(aChild.vals[0], bChild.vals[0]);
-					} else if(aChild != null && bChild == null) {
+					if(a != null && b != null ) {
+						return Integer.compare(a.getVal(0), b.getVal(0));
+					} else if(a == null && b != null) {
 						return 1;
-					}else if(aChild == null && bChild != null) {
+					}else if(a != null && b == null ) {
 						return -1;
 					}
 					return 0; // both null, therefore same weight
@@ -202,6 +203,7 @@ public class Tree {
 			if (index < MAX_VALS && index < numVals) {
 				vals[index] = null;
 				numVals--;
+				size--;
 				order();
 			}
 		}
@@ -227,23 +229,29 @@ public class Tree {
 				}
 				// Now we have a bunch of unassigned children. Assign them to parent's new children
 				adjustSplitNodeChildren();
+				root = parent;
+				children = parent.children;
+				parent = null;
 			}else {// Means we have a parent.
-				
 				parent.addVal(vals[(numVals - 1) / 2]); // Pushing middle value upwards
 				removeVal((numVals - 1) / 2);
-				while(numVals > 0) { // Converting all values to children. Done so in order.
-					parent.addChild(new Node(vals[0]));
-					removeVal(0);
+				while(numVals > 1) { // Converting all values to children. Done so in order.
+					parent.addChild(vals[1]);
+					removeVal(1);
 				}
+				orderChildren();
 				adjustSplitNodeChildren();
+				if(parent.numVals >= MAX_VALS) parent.split(); // Recursively calls split if necessary.
 			}
-			if(parent.numVals >= MAX_VALS) parent.split(); // Recursively calls split if necessary.
+			
+			
+			
 		}
 		
 		// might be slightly specific to 23 trees. Will not be general enough for a B tree.
 		private void adjustSplitNodeChildren() {
-			for(int i = 1; i < parent.numChildren; i++) { // Starts at 1 
-				for(int j = 0 + ((i-1) * MAX_CHILDREN / 2); j < MAX_CHILDREN / 2; j++) {
+			for(int i = 0; i < parent.numChildren; i++) { 
+				for(int j = 0 + ((i) * MAX_CHILDREN / 2); j < MAX_CHILDREN / 2; j++) {
 					parent.children[i].children[j] = children[j];
 				}
 			}
