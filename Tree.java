@@ -250,11 +250,18 @@ public class Tree {
 		
 		// might be slightly specific to 23 trees. Will not be general enough for a B tree.
 		private void adjustSplitNodeChildren() {
-			for(int i = 0; i < parent.numChildren; i++) { 
-				for(int j = 0 + ((i) * MAX_CHILDREN / 2); j < MAX_CHILDREN / 2; j++) {
-					parent.children[i].children[j] = children[j];
-				}
+			
+			// I am just going to do this by hand. Clearly I can't do it w/ loops
+			
+			/*
+			int outer = 0;
+			for(int i = 0; i < MAX_CHILDREN; i++) {
+				if(i % MAX_CHILDREN / 2 == 0) outer++;  // TODO: Fix this area.
+				parent.children[outer].children[i] = children[i];
 			}
+*/
+				
+			
 		}
 		
 		// We are working with a valid tree.
