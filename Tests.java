@@ -18,6 +18,30 @@ public class Tests{
 		assertEquals(false, t.insert(10)); // further proves we don't insert duplicates.
 	}
 	
+	@Test
+	public void addingManyValues() {
+		Tree t = new Tree();
+		
+		t.insert(4);
+		t.insert(1);
+		t.insert(3);
+		t.insert(100);
+		t.insert(0);
+		t.insert(200);
+		t.insert(4);
+		t.insert(10);
+		t.insert(6);
+		t.insert(-1);
+		t.insert(-10);
+		t.insert(-15);
+		
+		
+		
+		assertEquals(11, t.size());
+		assertEquals(-15, t.get(0));
+		assertEquals(-10, t.get(1));
+		assertEquals(-1, t.get(2));
+	}
 
 	
    @Test
@@ -46,40 +70,10 @@ public class Tests{
       assertEquals(2, t.size(15));
       assertEquals(0, t.size(18));
       
-      //assertEquals(9, t.get(0));
-     // assertEquals(15, t.get(1));
+      assertEquals(9, t.get(0));
+      assertEquals(15, t.get(1));
    }
    
-   /*
-   Illegal tests that require node to be separate public/protected class. Requires private methods to be public. Requires illegal tree constructor.
-   Used for testing real 23 trees since I can't get my split to work.
-  
-
-   @Test
-   public void manualTestOfTreeUsingIllegalNodeAndTree() {
-	   Tree t = new Tree();
-	   Tree.Node node = t.new Node();
-	   
-	   // =======================TESTING SPLIT WITH NULL PARENT======================================
-	   node.insert(0);
-	   node.insert(1);
-	   node.insert(2); // Causes split.
-	   assertEquals(3, node.size());
-	   assertEquals(node.children[0], node.find(0)); // Confirming our 0 value is now a child rather than in same root node.
-	   assertEquals(node.children[2], node.find(2));
-	   node.insert(3);
-	   assertEquals(node.children[2], node.find(3)); // means our insert properly goes down the tree.
-	   node.insert(4); // Causes split.
-	   assertEquals(node.children[2], node.find(4));
-	   // ============================TESTING 2nd SPLIT WITH NON NULL PARENT=====================================
-	   node.insert(5);
-	   assertEquals(6, node.size());
-	   assertEquals(node.children[2], node.find(5)); // IT'S WORKING
-	   node.insert(6); // Will causes a double split... I pray to god this will work   
-   }
-	*/
-	
-
    @Test
    public void oneSplitLeft()
    {
@@ -97,9 +91,9 @@ public class Tests{
       assertEquals(0, t.size(0));
       assertEquals(0, t.size(3));
 
-      //assertEquals(1, t.get(0));
-     // assertEquals(9, t.get(1));
-      //assertEquals(15, t.get(2));
+      assertEquals(1, t.get(0));
+      assertEquals(9, t.get(1));
+      assertEquals(15, t.get(2));
       
       assertEquals(3,t.size());
    }
@@ -121,12 +115,10 @@ public class Tests{
       assertEquals(0, t.size(0));
       assertEquals(0, t.size(3));
       
-     //assertEquals(1, t.get(0));
-     // assertEquals(9, t.get(1));
-      //assertEquals(15, t.get(2));
+      assertEquals(1, t.get(0));
+      assertEquals(9, t.get(1));
+      assertEquals(15, t.get(2));
       assertEquals(3,t.size());
-
-
    }
    
    @Test
@@ -146,9 +138,9 @@ public class Tests{
       assertEquals(0, t.size(0));
       assertEquals(0, t.size(3));
       
-    // assertEquals(1, t.get(0));
-    // assertEquals(9, t.get(1));
-    // assertEquals(15, t.get(2));
+      assertEquals(1, t.get(0));
+      assertEquals(9, t.get(1));
+      assertEquals(15, t.get(2));
       assertEquals(3,t.size());
 
 
@@ -200,13 +192,13 @@ public class Tests{
       assertEquals(1, t.size(7));
       assertEquals(0, t.size(8));
       
-     // assertEquals(1, t.get(0));
-     // assertEquals(4, t.get(1));
-      //assertEquals(7, t.get(2));
-      //assertEquals(9, t.get(3));
-      //assertEquals(13, t.get(4));
-      ////assertEquals(15, t.get(5));
-      //assertEquals(20, t.get(6));
+      assertEquals(1, t.get(0));
+      assertEquals(4, t.get(1));
+      assertEquals(7, t.get(2));
+      assertEquals(9, t.get(3));
+      assertEquals(13, t.get(4));
+      assertEquals(15, t.get(5));
+      assertEquals(20, t.get(6));
       assertEquals(7,t.size());
    }
 

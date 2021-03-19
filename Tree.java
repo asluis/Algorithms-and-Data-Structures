@@ -7,21 +7,21 @@ import java.util.Comparator;
  - Constructor with no parameters. Only one constructor.		DONE
  
  
- - insert(x) method 			Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing TODO
+ - insert(x) method 			Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing DONE
  	- Discard duplicates
  	- Return true if element is added, false if not added (if duplicate then would return false)
  	- Use tree structure itself, nothing else.
  	
  	
- - split(Node root)				Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO make sure that parent is assigned correctly. Fix cc bug
+ - split(Node root)				Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO
  	- split nodes. Might bubble upwards and cause chain of splitting.
  
  
- - find(root, val) 					Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing TODO
+ - find(root, val) 					Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing DONE
  	- finds and returns the node containing that value. Returns null if not found, else returns node w/ value. Private method.
  	
  	
- - size() method 				Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> TODO
+ - size() method 				Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing DONE
  	- returns the number of values in the tree. Includes values found in the same node.
  	
  	
@@ -29,7 +29,7 @@ import java.util.Comparator;
  	- will return the int size of the subtree rooted at the node that contains integer x. (The size is the number of keys in that subtree.) If x is not in the tree, it should return 0.
  	
  	
- - get(x) method				Implementation DONE -> Moved within Node class TODO
+ - get(x) method				Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing TODO
  	- returns the item that would be at location x if the values in tree were sorted in ascending order (from least to largest, t.get(0) returns least item while t.get(t.size() - 1) returns largest item)
  	- Don't use any other structure, just use the 23 tree
  	
@@ -119,11 +119,7 @@ public class Tree {
 		}
 		
 		public void addChild(Integer value) {
-			if(numChildren == 0) {
-				children[0] = new Node(value, this);
-				numChildren++;
-				return;
-			}
+
 			if(numChildren < MAX_CHILDREN) {
 				children[numChildren] = new Node(value, this);
 				numChildren++;	
@@ -131,16 +127,14 @@ public class Tree {
 			}
 		}
 		
-		/*
-		public void addChild(Node child) {
+		public void addChild(Node child) {			
 			if(numChildren < MAX_CHILDREN) {
 				child.parent = this;
-				children[numChildren - 1] = child;
+				children[numChildren] = child;
 				numChildren++;
 				orderChildren();
 			}
 		}
-		*/
 		
 		public void removeChild(int index) {
 			if (index < MAX_CHILDREN && index < numChildren) {
@@ -160,7 +154,6 @@ public class Tree {
 			}
 		}
 
-		
 		private void orderChildren() {
 			
 			
@@ -243,25 +236,27 @@ public class Tree {
 				adjustSplitNodeChildren();
 				if(parent.numVals >= MAX_VALS) parent.split(); // Recursively calls split if necessary.
 			}
-			
-			
-			
 		}
 		
 		// might be slightly specific to 23 trees. Will not be general enough for a B tree.
 		private void adjustSplitNodeChildren() {
+			int outer = -1;
+			int childChild = 0;
 			
-			// I am just going to do this by hand. Clearly I can't do it w/ loops
-			
-			/*
-			int outer = 0;
 			for(int i = 0; i < MAX_CHILDREN; i++) {
-				if(i % MAX_CHILDREN / 2 == 0) outer++;  // TODO: Fix this area.
-				parent.children[outer].children[i] = children[i];
+				if(i % 2 == 0) {
+					outer++;
+					childChild = 0;
+				}else {
+					childChild = 1;
+				}
+				if(parent.children[outer].children[childChild] == null) {
+					//parent.children[outer].children[childChild] = children[i];
+					if(children[i] != null) parent.children[outer].addChild(children[i]);
+					
+					//parent.children[outer].numChildren++;
+				}
 			}
-*/
-				
-			
 		}
 		
 		// We are working with a valid tree.
@@ -293,68 +288,29 @@ public class Tree {
 		}
 		
 		
-		// TODO: Figure out which of these approaches works... WIP RIP
 		/*
 		 * Observation: index of leftmost val in root is size of left subtree. Index of rightmost val is size of leftmost + size of midsubtree + 1
 		 */
-		// In order for BST: left, visit, right. For 23 Tree I think it will be left,
-		// visit, mid, visit, right ?
-		// Assumes nodes do not exceed maxiumum (2). Assumes index exists in tree.
 		public Integer get(int targetIndex) {
 			// "I will not call it with values that are supposed to be out of bounds."
 			// Index of val a is size of left subtree. Index of right val is size of leftsubtree + size of Mid subtree + 1.
 			
+			// Case for when targetIndex is less than the current value's index
+			int currentSize = 0;
+			for(int index = 0; index < numVals; index++) {
+				if(index < numChildren) currentSize += children[index].size(); // Add the size of the subtree we're skipping over
+				if(targetIndex == currentSize) return vals[index];
+				if(targetIndex < currentSize) { 
+					if(index < numChildren) return children[index].get(targetIndex); // No need to subtract anything because we aren't skipping anything.
+				}
+				currentSize++; // Add the value we're skipping over.
+			}
 			
-			if (targetIndex < MAX_VALS) {
-				return vals[targetIndex];
+			// Case for when the target index is greater than last value's index
+			if(targetIndex >= currentSize) {
+				return children[numChildren - 1].get(targetIndex - currentSize); // Subtract size of currentIndex because we're skipping that many nodes
 			}
-			int nodeSkipped = 0;
-			for(int i = 0; i < MAX_VALS - 1; i++) {
-				if(vals[i] != null) {
-					for(int j = 0; j <= i; j++) {
-						if(children[j] != null) {
-							nodeSkipped+= children[j].size();
-						}
-					}
-					if(targetIndex == 0 || targetIndex == nodeSkipped) {
-						return vals[i];
-					}
-					if(targetIndex < nodeSkipped) {
-						return children[i].get(targetIndex - nodeSkipped);
-					}
-				}else { // We got to a null val, check if our value is in corresponding children index
-					return children[i].get(targetIndex - nodeSkipped);
-				}
-			}
-/*
-			if (root.lfChild == null && root.midChild == null && root.rtChild == null) { // Are we in a leaf? BASE CASE
-				if (targetIndex == currIndex) { // Does the firstVal in leaf contain the index of item we look for?
-					return root.getVal(0);
-				} else if (targetIndex == ++currIndex && root.getVal(1) != null) { // Does the 2nd val in leaf contain the
-																					// index of item we look for?
-					return root.getVal(1);
-				}
-			}
-			get(root.lfChild, targetIndex, ++currIndex); // Go as far down the left subtree as possible.
-			if (targetIndex == currIndex) { // If we get here it's because we didn't find anything in left subtrees. Check
-											// if maybe this node has our val
-				return root.getVal(0);
-			} else if (targetIndex == ++currIndex) { // TODO: Will this line work? I will think about it when it's not 2:20
-														// am
-				return root.getVal(1);
-			}
-			get(root.midChild, targetIndex, ++currIndex); // Means we didnt find val in left subtree. Go back to where we
-															// started going down left subtree and
-															// go down to midChild, then start going down left subtree
-															// again.
-			if (targetIndex == currIndex) {
-				return root.getVal(0);
-			} else if (targetIndex == ++currIndex) { // TODO: Will this line work? Probably not. Index is not linear
-				return root.getVal(1);
-			}
-			get(root.rtChild, targetIndex, ++currIndex);
-*/
-			return null;
+			return null; // ie not found
 		}
 		
 		// Assumes nodes have been properly split (i.e., max vals per node is 2) and no
@@ -379,8 +335,8 @@ public class Tree {
 		public int size() {// Iterates thru all children and adds their size to the sum. Then we return that sum.
 			int currNodeCount = numVals;
 			// Essentially iterating over children array and adding each to our count. 
-			for(int child = 0; child < numChildren; child++) {
-				currNodeCount += children[child].size();
+			for(int child = 0; child < MAX_CHILDREN; child++) {
+				if(children[child] != null) currNodeCount += children[child].size();
 			}
 			return currNodeCount;
 		}
