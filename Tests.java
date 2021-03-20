@@ -33,7 +33,7 @@ public class Tests{
 		t.insert(6);
 		t.insert(-1);
 		t.insert(-10);
-		t.insert(-15);
+		t.insert(-15); // Messes everything up
 		
 		
 		

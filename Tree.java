@@ -1,43 +1,6 @@
 import java.util.Arrays;
 import java.util.Comparator;
 
-/*
- Notes:
- 
- - Constructor with no parameters. Only one constructor.		DONE
- 
- 
- - insert(x) method 			Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing DONE
- 	- Discard duplicates
- 	- Return true if element is added, false if not added (if duplicate then would return false)
- 	- Use tree structure itself, nothing else.
- 	
- 	
- - split(Node root)				Implementation DONE -> Preliminary Testing DONE -> Deep Testing TODO
- 	- split nodes. Might bubble upwards and cause chain of splitting.
- 
- 
- - find(root, val) 					Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing DONE
- 	- finds and returns the node containing that value. Returns null if not found, else returns node w/ value. Private method.
- 	
- 	
- - size() method 				Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing DONE
- 	- returns the number of values in the tree. Includes values found in the same node.
- 	
- 	
- - size(int x) method			Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing TODO
- 	- will return the int size of the subtree rooted at the node that contains integer x. (The size is the number of keys in that subtree.) If x is not in the tree, it should return 0.
- 	
- 	
- - get(x) method				Implementation DONE -> Moved within Node class DONE -> Preliminary Testing DONE -> Deep Testing TODO
- 	- returns the item that would be at location x if the values in tree were sorted in ascending order (from least to largest, t.get(0) returns least item while t.get(t.size() - 1) returns largest item)
- 	- Don't use any other structure, just use the 23 tree
- 	
- 	
- - Create own JUnit tests		TODO
-
- */
-
 // All code is created by Luis Alvarez Sanchez for CS 146.
 
 public class Tree {
@@ -54,7 +17,6 @@ public class Tree {
 		return this.size;
 	}
 	
-
 	public int size(Integer val) {
 
 		Node node = root.find(val);
@@ -137,7 +99,7 @@ public class Tree {
 		}
 		
 		public void removeChild(int index) {
-			if (index < MAX_CHILDREN && index < numChildren) {
+			if (index < numChildren) {
 				children[index] = null;
 				numChildren--;
 				orderChildren();
@@ -155,8 +117,6 @@ public class Tree {
 		}
 
 		private void orderChildren() {
-			
-			
 			Arrays.sort(parent.children, new Comparator<Node>() {
 				@Override
 				public int compare(Node a, Node b) {
@@ -223,7 +183,7 @@ public class Tree {
 				// Now we have a bunch of unassigned children. Assign them to parent's new children
 				adjustSplitNodeChildren();
 				root = parent;
-				children = parent.children;
+				//children = parent.children;
 				parent = null;
 			}else {// Means we have a parent.
 				parent.addVal(vals[(numVals - 1) / 2]); // Pushing middle value upwards
@@ -252,8 +212,9 @@ public class Tree {
 				}
 				if(parent.children[outer].children[childChild] == null) {
 					//parent.children[outer].children[childChild] = children[i];
-					if(children[i] != null) parent.children[outer].addChild(children[i]);
-					
+					if(children[i] != null) {
+						parent.children[outer].addChild(children[i]);
+					}
 					//parent.children[outer].numChildren++;
 				}
 			}
@@ -286,7 +247,6 @@ public class Tree {
 			}
 			return; // At the end, nothing to do.
 		}
-		
 		
 		/*
 		 * Observation: index of leftmost val in root is size of left subtree. Index of rightmost val is size of leftmost + size of midsubtree + 1
